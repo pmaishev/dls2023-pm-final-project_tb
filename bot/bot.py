@@ -28,7 +28,7 @@ def send_welcome(message):
         diff = int(cmd[1])
     else:
         diff = 0
-    bot.reply_to(message, f'Пойду, подготовлю данные, {message.from_user.first_name}')
+    bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
     x = threading.Thread(target=P_schedule.send_message1, args=(diff, message.chat.id))
     x.start()
 
