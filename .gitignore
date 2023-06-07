@@ -1,0 +1,6 @@
+*__pycache__*
+.env
+*tmp*
+*logs*
+*.mypy_cache*
+*.vscode*

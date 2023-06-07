@@ -1,0 +1,65 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+stages:
+  - build
+  - test
+  - deploy
+
+before_script:
+  - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    DOCKER_REGISTRY: "registry.gitlab.com"
+    DOCKER_USERNAME: "gitlab-ci-token"
+    GROUP_NAME: dls2023-pm-final-project
+    PROJECT_NAME: bot
+    VERSION: "$CI_PIPELINE_IID"
+
+build:
+  stage: build
+  script:
+    - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > bot/version.py
+    - docker build -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION -f build/Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
+    - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
+    - docker tag $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+    - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:latest
+    - docker rmi $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
+  only:
+    - main
+    - devel
+  except:
+    changes:
+      - "*.md"
+
+test:
+  stage: test
+  script:
+    - echo "TODO Create tests"
+  except:
+    changes:
+      - "*.md"
+
+deploy:
+  stage: deploy
+  image: pmaishev/rancher:6
+  script:
+    - export RANCHER_URL=$RANCHER_DEV_URL
+    - export RANCHER_ACCESS_KEY=$RANCHER_DEV_ACCESS_KEY
+    - export RANCHER_SECRET_KEY=$RANCHER_DEV_SECRET_KEY
+    - export RANCHER_STACK=dls
+    - export RANCHER_ENVIRONMENT=Pmaishev
+    - export RANCHER_IMAGE=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
+    - export RANCHER_SERVICE=bot
+    - cd /app && node rancher.js
+  only:
+    - devel
+    - main
+  except:
+    changes:
+      - "*.md"
