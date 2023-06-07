@@ -7,8 +7,8 @@ import os
 
 bot = telebot.TeleBot(os.environ["BOT_TOKEN"])
 
-def start_process():#Запуск Process
-    p1 = Process(target=P_schedule.start_schedule, args=()).start()
+# def start_process():#Запуск Process
+#     p1 = Process(target=P_schedule.start_schedule, args=()).start()
  
     
 class P_schedule(): # Class для работы с schedule
@@ -33,7 +33,7 @@ def send_welcome(message):
     x.start()
 
 if __name__ == '__main__':
-    start_process()
+    # start_process()
     try:
         bot.polling(none_stop=True)
     except:
