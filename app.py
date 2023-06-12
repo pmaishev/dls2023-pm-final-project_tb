@@ -15,11 +15,14 @@ bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"])
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
 
 
-def send_message(message, wid):
+def style_transfer_message(message, wid):
     """
     Process and return image with new style
     """
-    bot.register_next_step_handler(message, files_process, wid)
+    print(f"SendMessage: Ready for files processing {message.chat.id}: {wid}")
+    print(f"TODO: Files processing {message.chat.id}: {wid}")
+    time.sleep(30)
+    bot.send_message(message.chat.id, "Done")
 
     ################
 def upload_main_file_process(message, wid):
@@ -38,11 +41,11 @@ def upload_style_file_process(message, wid):
     try:
         upload_file(message, wid, 'style')
         bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-        thread = threading.Thread(target=send_message, args=[message, wid])
+        thread = threading.Thread(target=style_transfer_message, args=[message, wid])
         thread.start()
     except Exception as e:
         print(str(e))
-        bot.send_message(message.chat.id, "Ошибка! Отправьте файл как документ")
+        bot.send_message(message.chat.id, "Ошибка! Отправьте изображение стиля.")
         #bot.register_next_step_handler(message, files_process)
 
 def upload_file(message, wid, ftype):
@@ -55,12 +58,6 @@ def upload_file(message, wid, ftype):
     with open(src, 'wb') as new_file:
         new_file.write(downloaded_file)
     bot.send_message(message.chat.id, "Файл успешно загружен")
-
-def files_process(message, wid):
-    print(f"TODO: Files processing {message.chat.id}: {wid}")
-    time.sleep(30)
-    bot.send_message(message.chat.id, "Done")
-
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
