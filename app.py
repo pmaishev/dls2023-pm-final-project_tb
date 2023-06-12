@@ -15,15 +15,10 @@ bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"])
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
 
 
-def send_message(message, chat_id):
+def send_message(message, wid):
     """
     Process and return image with new style
     """
-    wid = str(uuid.uuid4())
-    bot.send_message(chat_id, "Отправьте файл с основным изображением.")
-    bot.register_next_step_handler(message, uploadfile_process, wid, 'main')
-    bot.send_message(chat_id, "Отправьте изображение с стилем.")
-    bot.register_next_step_handler(message, uploadfile_process, wid, 'style')
     bot.register_next_step_handler(message, files_process, wid)
 
     ################
@@ -59,8 +54,13 @@ def send_transfered_image(message):
     """
     Upload image and process it
     """
+    wid = str(uuid.uuid4())
+    message = bot.reply_to(message, "Отправьте файл с основным изображением.")
+    bot.register_next_step_handler(message, uploadfile_process, wid, 'main')
+    bot.bot.reply_to(message, "Отправьте изображение с стилем.")
+    bot.register_next_step_handler(message, uploadfile_process, wid, 'style')
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=send_message, args=[message, message.chat.id])
+    thread = threading.Thread(target=send_message, args=[message, wid])
     thread.start()
 
 if __name__ == '__main__':
