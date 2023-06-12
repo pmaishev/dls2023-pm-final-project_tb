@@ -23,6 +23,6 @@ jobs:
     - name: Build and Push the Docker image
       run: |
         echo ${{ github.workflow }}
-        echo ${{ github.ref }}
-        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.ref }}
-        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.ref }}
+        echo ${{ github.sha }}
+        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.sha }}
+        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.sha }}
