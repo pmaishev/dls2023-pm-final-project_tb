@@ -57,7 +57,7 @@ def callback_query(call):
         def photo_processing(message):
             file_info = bot.get_file(message.photo.file_id)
             downloaded_file = bot.download_file(file_info.file_path)
-            with open(f'tmp/{uuid.uuid4()}.jpg', 'wb') as new_file:
+            with open(f'/tmp/{uuid.uuid4()}.jpg', 'wb') as new_file:
                 new_file.write(downloaded_file)
             #bot.answer_callback_query(call.id, "CB Main")
     elif call.data == "cb_style":
