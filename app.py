@@ -1,7 +1,7 @@
 """
 Telegram bot for style transfering
 """
-#import time
+import time
 import os
 #from multiprocessing import *
 #import schedule
@@ -22,25 +22,45 @@ def send_message(message, wid):
     bot.register_next_step_handler(message, files_process, wid)
 
     ################
-def uploadfile_process(message, wid, type):
+def upload_main_file_process(message, wid):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        os.makedirs(f'/tmp/{wid}', exist_ok=True)
-        file_info = bot.get_file(message.photo[2].file_id)
-        print(file_info.file_path)
-        downloaded_file = bot.download_file(file_info.file_path)
-        src = f"/tmp/{wid}/{type}_{file_info.file_path.split('/')[-1]}"
-        print(file_info.file_path, src)
-        with open(src, 'wb') as new_file:
-            new_file.write(downloaded_file)
-        bot.send_message(message.chat.id, "Файл успешно загружен")
+        upload_file(message, wid, 'main')
+        message = bot.reply_to(message, "Отправьте изображение с стилем.")
+        bot.register_next_step_handler(message, upload_style_file_process, wid)
+    except Exception as e:
+        print(str(e))
+        bot.send_message(message.chat.id, "Ошибка! Отправьте изображение")
+        #bot.register_next_step_handler(message, files_process)
+
+def upload_style_file_process(message, wid):
+    bot.send_chat_action(message.chat.id, 'typing')
+    try:
+        upload_file(message, wid, 'style')
+        bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
+        thread = threading.Thread(target=send_message, args=[message, wid])
+        thread.start()
     except Exception as e:
         print(str(e))
         bot.send_message(message.chat.id, "Ошибка! Отправьте файл как документ")
         #bot.register_next_step_handler(message, files_process)
 
+def upload_file(message, wid, ftype):
+    os.makedirs(f'/tmp/{wid}', exist_ok=True)
+    file_info = bot.get_file(message.photo[2].file_id)
+    print(file_info.file_path)
+    downloaded_file = bot.download_file(file_info.file_path)
+    src = f"/tmp/{wid}/{ftype}_{file_info.file_path.split('/')[-1]}"
+    print(file_info.file_path, src)
+    with open(src, 'wb') as new_file:
+        new_file.write(downloaded_file)
+    bot.send_message(message.chat.id, "Файл успешно загружен")
+
 def files_process(message, wid):
     print(f"TODO: Files processing {message.chat.id}: {wid}")
+    time.sleep(30)
+    bot.send_message(message.chat.id, "Done")
+
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -56,12 +76,7 @@ def send_transfered_image(message):
     """
     wid = str(uuid.uuid4())
     message = bot.reply_to(message, "Отправьте файл с основным изображением.")
-    bot.register_next_step_handler(message, uploadfile_process, wid, 'main')
-    message = bot.reply_to(message, "Отправьте изображение с стилем.")
-    bot.register_next_step_handler(message, uploadfile_process, wid, 'style')
-    bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=send_message, args=[message, wid])
-    thread.start()
+    bot.register_next_step_handler(message, upload_main_file_process, wid)
 
 if __name__ == '__main__':
     # start_process()
