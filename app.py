@@ -15,20 +15,37 @@ bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"])
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
 
 
-def send_message(chat_id):
+def send_message(message, chat_id):
     """
     Process and return image with new style
     """
-    bot.send_message(chat_id=chat_id, text='msg')
-    button_foo = telebot.types.InlineKeyboardButton('Main image', callback_data='cb_main')
-    button_bar = telebot.types.InlineKeyboardButton('Style image', callback_data='cb_style')
+    wid = str(uuid.uuid4())
+    bot.send_message(chat_id, "Отправьте файл с основным изображением.")
+    bot.register_next_step_handler(message, uploadfile_process, wid, 'main')
+    bot.send_message(chat_id, "Отправьте изображение с стилем.")
+    bot.register_next_step_handler(message, uploadfile_process, wid, 'style')
+    bot.register_next_step_handler(message, files_process, wid)
 
-    keyboard = telebot.types.InlineKeyboardMarkup()
-    keyboard.add(button_foo)
-    keyboard.add(button_bar)
-
-    bot.send_message(chat_id, text='Keyboard example', reply_markup=keyboard)
     ################
+def uploadfile_process(message, wid, type):
+    bot.send_chat_action(message.chat.id, 'typing')
+    try:
+        os.makedirs(f'/tmp/{wid}', exist_ok=True)
+        file_info = bot.get_file(message.photo[2].file_id)
+        print(file_info.file_path)
+        downloaded_file = bot.download_file(file_info.file_path)
+        src = f"/tmp/{wid}/{type}_{file_info.file_path.split('/')[-1]}"
+        print(file_info.file_path, src)
+        with open(src, 'wb') as new_file:
+            new_file.write(downloaded_file)
+        bot.send_message(message.chat.id, "Файл успешно загружен")
+    except Exception as e:
+        print(str(e))
+        bot.send_message(message.chat.id, "Ошибка! Отправьте файл как документ")
+        #bot.register_next_step_handler(message, files_process)
+
+def files_process(message, wid):
+    print(f"TODO: Files processing {message.chat.id}: {wid}")
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -42,26 +59,9 @@ def send_transfered_image(message):
     """
     Upload image and process it
     """
-#    cmd = message.text.split()
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=send_message, args=[message.chat.id])
+    thread = threading.Thread(target=send_message, args=[message, message.chat.id])
     thread.start()
-
-@bot.callback_query_handler(func=lambda call: True)
-def callback_query(call):
-    """
-    Buttons callbacks
-    """
-    if call.data == "cb_main":
-        @bot.message_handler(content_types=['photo'])
-        def photo_processing(message):
-            file_info = bot.get_file(message.photo.file_id)
-            downloaded_file = bot.download_file(file_info.file_path)
-            with open(f'/tmp/{uuid.uuid4()}.jpg', 'wb') as new_file:
-                new_file.write(downloaded_file)
-            #bot.answer_callback_query(call.id, "CB Main")
-    elif call.data == "cb_style":
-        bot.answer_callback_query(call.id, "CB Style")
 
 if __name__ == '__main__':
     # start_process()
