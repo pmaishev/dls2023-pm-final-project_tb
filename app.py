@@ -43,11 +43,14 @@ def send_transfered_image(message):
     """
 #    cmd = message.text.split()
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=send_message, args=(message.chat.id))
+    thread = threading.Thread(target=send_message, args=message.chat.id)
     thread.start()
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
+    """
+    Buttons callbacks
+    """
     if call.data == "cb_main":
         bot.answer_callback_query(call.id, "CB Main")
     elif call.data == "cb_style":
@@ -57,5 +60,5 @@ if __name__ == '__main__':
     # start_process()
     try:
         bot.polling(none_stop=True)
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         pass
