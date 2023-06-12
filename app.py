@@ -57,7 +57,7 @@ def send_transfered_image(message):
     wid = str(uuid.uuid4())
     message = bot.reply_to(message, "Отправьте файл с основным изображением.")
     bot.register_next_step_handler(message, uploadfile_process, wid, 'main')
-    bot.bot.reply_to(message, "Отправьте изображение с стилем.")
+    message = bot.reply_to(message, "Отправьте изображение с стилем.")
     bot.register_next_step_handler(message, uploadfile_process, wid, 'style')
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
     thread = threading.Thread(target=send_message, args=[message, wid])
