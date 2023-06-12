@@ -6,6 +6,7 @@ import os
 #from multiprocessing import *
 #import schedule
 import threading
+import uuid
 import telebot
 
 bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"])
@@ -43,7 +44,7 @@ def send_transfered_image(message):
     """
 #    cmd = message.text.split()
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=send_message, args=message.chat.id)
+    thread = threading.Thread(target=send_message, args=[message.chat.id])
     thread.start()
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -52,7 +53,13 @@ def callback_query(call):
     Buttons callbacks
     """
     if call.data == "cb_main":
-        bot.answer_callback_query(call.id, "CB Main")
+        @bot.message_handler(content_types=['photo'])
+        def photo_processing(message):
+            file_info = bot.get_file(message.photo.file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
+            with open(f'tmp/{uuid.uuid4()}.jpg', 'wb') as new_file:
+                new_file.write(downloaded_file)
+            #bot.answer_callback_query(call.id, "CB Main")
     elif call.data == "cb_style":
         bot.answer_callback_query(call.id, "CB Style")
 
