@@ -1,9 +1,9 @@
 #import time
-import telebot
+import os
 from multiprocessing import *
 #import schedule
 import threading
-import os
+import telebot
 
 bot = telebot.TeleBot(os.environ["BOT_TOKEN"])
 
@@ -29,7 +29,7 @@ class P_schedule(): # Class для работы с schedule
 def send_welcome(message):
     bot.reply_to(message, f'Я бот. Приятно познакомиться, {message.from_user.first_name}')
 
-@bot.message_handler(commands=['test'])
+@bot.message_handler(commands=['transfer_style'])
 def send_welcome(message):
     cmd = message.text.split()
     if len(cmd) >= 2 and cmd[1].isdigit():
@@ -37,8 +37,8 @@ def send_welcome(message):
     else:
         diff = 0
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    x = threading.Thread(target=P_schedule.send_message1, args=(diff, message.chat.id))
-    x.start()
+    thread = threading.Thread(target=P_schedule.send_message1, args=(diff, message.chat.id))
+    thread.start()
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
