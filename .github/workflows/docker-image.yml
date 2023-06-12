@@ -22,6 +22,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build and Push the Docker image
       run: |
-        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.workflow }}
-        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.workflow }}
         echo ${{ github.workflow }}
+        echo ${{ github.ref }}
+        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.ref }}
+        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.ref }}
