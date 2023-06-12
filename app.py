@@ -1,6 +1,6 @@
 #import time
 import os
-from multiprocessing import *
+#from multiprocessing import *
 #import schedule
 import threading
 import telebot
@@ -11,7 +11,7 @@ bot = telebot.TeleBot(os.environ["BOT_TOKEN"])
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
 
 
-class P_schedule(): # Class для работы с schedule
+class CThread(): # Class для работы с schedule
     ####Функции для выполнения заданий по времени
     def send_message1(td, chat_id):
         bot.send_message(chat_id=chat_id, text='msg')
@@ -37,7 +37,7 @@ def send_welcome(message):
     else:
         diff = 0
     bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-    thread = threading.Thread(target=P_schedule.send_message1, args=(diff, message.chat.id))
+    thread = threading.Thread(target=CThread.send_message1, args=(diff, message.chat.id))
     thread.start()
 
 @bot.callback_query_handler(func=lambda call: True)
