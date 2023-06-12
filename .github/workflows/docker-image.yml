@@ -21,9 +21,9 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build the Docker image
-      run: docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/devel:latest
+      run: docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb:latest
     - name: Push the Docker image
-      run: docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/devel:latest
+      run: docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb:latest
     - name: Echo1
       run: echo ${{ github.ref_name }}
     - name: Echo2
