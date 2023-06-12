@@ -23,6 +23,7 @@ jobs:
     - name: Build and Push the Docker image
       run: |
         echo ${{ github.workflow }}
-        echo ${{ github.sha[0:8] }}
-        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.sha[0:8] }}
-        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${{ github.sha[0:8] }}
+        echo "SHORT_SHA=`echo ${{ github.sha::7 }} | cut -c1-8`" >> $GITHUB_ENV
+        echo ${SHORT_SHA}
+        docker build . --file build/Dockerfile --tag ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${SHORT_SHA}
+        docker push ghcr.io/pmaishev/dls2023-pm-final-project_tb/${{ github.ref_name }}:${SHORT_SHA}
