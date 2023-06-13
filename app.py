@@ -8,8 +8,10 @@ import os
 import threading
 import uuid
 import telebot
+from config import CBotConfig
 
-bot = telebot.TeleBot(os.environ["TG_BOT_TOKEN"])
+config = CBotConfig()
+bot = telebot.TeleBot(config.token)
 
 # def start_process():#Запуск Process
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
@@ -19,7 +21,6 @@ def style_transfer_message(message, wid):
     """
     Process and return image with new style
     """
-    print(f"SendMessage: Ready for files processing {message.chat.id}: {wid}")
     print(f"TODO: Files processing {message.chat.id}: {wid}")
     time.sleep(30)
     bot.send_message(message.chat.id, "Done")
@@ -49,14 +50,9 @@ def upload_style_file_process(message, wid):
         #bot.register_next_step_handler(message, files_process)
 
 def upload_file(message, wid, ftype):
-    os.makedirs(f'/tmp/{wid}', exist_ok=True)
     file_info = bot.get_file(message.photo[2].file_id)
-    print(file_info.file_path)
     downloaded_file = bot.download_file(file_info.file_path)
-    src = f"/tmp/{wid}/{ftype}_{file_info.file_path.split('/')[-1]}"
-    print(file_info.file_path, src)
-    with open(src, 'wb') as new_file:
-        new_file.write(downloaded_file)
+    config.data_saver.save_data(wid, ftype, file_info.file_path.split('/')[-1], downloaded_file)
     bot.send_message(message.chat.id, "Файл успешно загружен")
 
 @bot.message_handler(commands=['start', 'help'])
