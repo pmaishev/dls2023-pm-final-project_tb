@@ -99,7 +99,7 @@ class CStyleTransfer():
         style_grams = {layer: self.gram_matrix(style_features[layer]) for layer in style_features}
 
         target_img = content_img.clone().requires_grad_(True).to(self.config.device)
-        show_every = 10
+        show_every = 1000
         optimizer = self.config.optimizer([target_img], lr=3e-3)
         num_epochs = 500 
 
@@ -117,9 +117,9 @@ class CStyleTransfer():
                 # get the "style" style representation
                 style_gram = style_grams[layer]
                 # the style loss for one layer, weighted appropriately
-                layer_style_loss = 2 * self.config.style_weights[layer] * torch.mean((target_gram - style_gram)**2)
+                layer_style_loss = 2*self.config.style_weights[layer]*torch.mean((target_gram - style_gram)**2)
                 # add to the style loss
-                style_loss += layer_style_loss / (d * h * w)
+                style_loss += layer_style_loss / (d*h*w)
 
             total_loss = self.config.content_weight*content_loss + self.config.style_weight*style_loss
             # update your target image
@@ -134,136 +134,4 @@ class CStyleTransfer():
                 plt.suptitle('Epoch %d/%d'%(ii, num_epochs))
                 plt.show()
 
-
-
-        # """
-        # Method for style transferring:
-        # - wid - path identifier to images with content, style and mask
-        # """
-        # content_img = self.load_and_transform_image(wid, 'content').to(self.config.device)
-        # style_img = self.load_and_transform_image(wid, 'style', shape=content_img.shape[-2:]).to(self.config.device)
-        # # try:
-        # #     mask = self.config.get_data_loader().load_data(wid, 'mask')
-        # # except ValueError:
-        # #     mask = None
-        # target_img = content_img.clone().requires_grad_(True).to(self.config.device)
-
-        # #optimizer = self.config.optimizer([target_img])
-        # content_features = self.get_features(target_img, cnn)
-        # style_features = self.get_features(style_img, cnn)
-        # style_grams = {layer: self.gram_matrix(style_features[layer]) for layer in style_features}
-
-        # style_weights = {'conv1_1': 1.,
-        #                 'conv2_1': 0.75,
-        #                 'conv3_1': 0.2,
-        #                 'conv4_1': 0.2,
-        #                 'conv5_1': 0.2}
-        # content_weight = 1 
-        # style_weight = 1e9
-
-
-        # print('Optimizing..')
-        # show_every = 50
-        # optimizer = optim.Adam([target_img], lr=3e-3)
-        # num_epochs = 500 
-        # for ii in range(1, num_epochs+1):
-        #     target_features = self.get_features(target_img, cnn)
-        #     content_loss = torch.mean((target_features['conv4_2'] - content_features['conv4_2'])**2)
-        #     style_loss = 0
-            
-        #     for layer in style_weights:
-        #         # get the "target" style representation for the layer
-        #         target_feature = target_features[layer]
-        #         target_gram = self.gram_matrix(target_feature)
-        #         _, d, h, w = target_feature.shape
-        #         # get the "style" style representation
-        #         style_gram = style_grams[layer]
-        #         # the style loss for one layer, weighted appropriately
-        #         layer_style_loss = 2 * style_weights[layer] * torch.mean((target_gram - style_gram)**2)
-        #         # add to the style loss
-        #         style_loss += layer_style_loss / (d * h * w)
-
-        #     total_loss = content_weight * content_loss + style_weight * style_loss
-        #     #print(total_loss)
-        #     # update your target image
-        #     optimizer.zero_grad()
-        #     total_loss.backward()
-        #     optimizer.step()
-            
-        #     # display intermediate images and print the loss
-        #     if  ii % show_every == 0:
-        #         #clear_output()
-        #         plt.imshow(im_convert(target_img))
-        #         plt.suptitle('Epoch %d/%d'%(ii, num_epochs))
-        #         plt.show()
-
-
-
-
-        # # for i in range(self.config.epoch):
-        # #     target_features = self.get_features(target_img, cnn)
-        # #     content_loss = torch.mean((target_features['conv4_2'] - content_features['conv4_2'])**2)
-        # #     style_loss = 0
-                
-        # #     for layer in self.config.style_weights:
-        # #         # get the "target" style representation for the layer
-        # #         target_feature = target_features[layer]
-                
-        # #         target_gram = self.gram_matrix(target_feature)
-                
-        # #         _, d, h, w = target_feature.shape
-        # #         # get the "style" style representation
-        # #         style_gram = style_grams[layer]
-        # #         # the style loss for one layer, weighted appropriately
-        # #         layer_style_loss = self.config.style_weights[layer] * torch.mean((target_gram - style_gram)**2)
-        # #         # add to the style loss
-        # #         style_loss += layer_style_loss / (d * h * w)
-
-        # #     total_loss = self.config.content_weight*content_loss + self.config.style_weight*style_loss
-        # #     #print(total_loss)
-            
-        # #     # update your target image
-        # #     optimizer.zero_grad()
-        # #     total_loss.backward()
-        # #     optimizer.step()
-            
-        # #     # display intermediate images and print the loss
-        # #     if  i % 10 == 0:
-        # #         dt = datetime.now().strftime("%H:%M:%S")
-        # #         print(f'{dt}: Epoche: {i} from {self.config.epoch}')
-
-
-        # # for i in range(self.config.epoch):
-        # #     def closure():
-        # #         # correct the values of updated input image
-        # #         with torch.no_grad():
-        # #             target_img.clamp_(0, 1)
-
-        # #         target_features = self.get_features(target_img, self.config.cnn)
-        # #         content_loss = torch.mean((target_features['conv4_2'] - content_features['conv4_2'])**2)
-        # #         style_loss = 0
-                    
-        # #         for layer in self.config.style_weights:
-        # #             # get the "target" style representation for the layer
-        # #             target_feature = target_features[layer]
-                    
-        # #             target_gram = self.gram_matrix(target_feature)
-                    
-        # #             _, d, h, w = target_feature.shape
-        # #             # get the "style" style representation
-        # #             style_gram = style_grams[layer]
-        # #             # the style loss for one layer, weighted appropriately
-        # #             layer_style_loss = self.config.style_weights[layer] * torch.mean((target_gram - style_gram)**2)
-        # #             # add to the style loss
-        # #             style_loss += layer_style_loss / (d * h * w)
-
-        # #         return self.config.content_weight*content_loss + self.config.style_weight*style_loss
-        # #     optimizer.step(closure)
-        # #     if  i % 10 == 0:
-        # #         dt = datetime.now().strftime("%H:%M:%S")
-        # #         print(f'{dt}: Epoche: {i} from {self.config.epoch}')
-
-        # # # a last correction...
-        # # with torch.no_grad():
-        # #     target_img.clamp_(0, 1)
         return target_img
