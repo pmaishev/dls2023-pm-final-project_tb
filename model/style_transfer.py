@@ -87,7 +87,7 @@ class CStyleTransfer():
         image = image.transpose(1,2,0)
         image = image * np.array(self.config.std_norm) + np.array(self.config.mean_norm)
 
-        return image.clip(0, 255).astype('uint8')
+        return (image.clip(0, 1)*255).astype('uint8')
 
     def transfer(self, wid: str):
         # load content
