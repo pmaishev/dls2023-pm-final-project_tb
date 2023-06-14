@@ -8,9 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def im_convert(tensor):
-    
     # convert tesnor to image, denormalize
-    
     image = tensor.to("cpu").clone().detach()
     image = image.numpy().squeeze()
     image = image.transpose(1,2,0)
@@ -24,8 +22,8 @@ config.data_loader = CFileDataLoader(basedir='C:/Dev/dls2023-pm-final-project/bo
 
 trans = CStyleTransfer(config)
 
-img = trans.transfer('1234567890')
-plt.imshow(im_convert(img))
+img = trans.transfer('00000000-0000-0000-0000-000000000000')
+plt.imshow(img)
 plt.show()
 
 #process()

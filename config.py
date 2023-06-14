@@ -11,3 +11,4 @@ class CBotConfig():
 
     def get_data_saver(self) -> IDataSaver:
         return self.data_saver
+

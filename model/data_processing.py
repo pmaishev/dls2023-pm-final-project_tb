@@ -2,7 +2,6 @@
 Module for data loading and saving
 """
 import os
-from PIL import Image
 
 class IDataLoader():
     def load_data(self, wid: str, ftype: str):
@@ -22,8 +21,8 @@ class CFileDataLoader(IDataLoader):
                 break
         else:
             raise ValueError(f'{ftype} is not valid ftype. ftype must be content, style or mask')
-        
-        return Image.open(f'{self.basedir}/{wid}/{name}').convert('RGB')
+
+        return open(f'{self.basedir}/{wid}/{name}', 'rb')
 
 class CFileDataSaver(IDataSaver):
     def __init__(self, basedir: str='./tmp'):

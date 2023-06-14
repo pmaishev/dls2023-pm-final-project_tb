@@ -9,6 +9,7 @@ import threading
 import uuid
 import telebot
 from config import CBotConfig
+from model.style_transfer import CStyleTransfer
 
 config = CBotConfig()
 bot = telebot.TeleBot(config.token)
@@ -22,7 +23,10 @@ def style_transfer_message(message, wid):
     Process and return image with new style
     """
     print(f"TODO: Files processing {message.chat.id}: {wid}")
-    time.sleep(30)
+    style_transfer = CStyleTransfer()
+
+    bot.send_message(message.chat.id, "Start")
+    bot.send_photo(message.chat.id, photo=style_transfer.transfer(wid))
     bot.send_message(message.chat.id, "Done")
 
     ################
@@ -52,7 +56,7 @@ def upload_style_file_process(message, wid):
 def upload_file(message, wid, ftype):
     file_info = bot.get_file(message.photo[2].file_id)
     downloaded_file = bot.download_file(file_info.file_path)
-    config.data_saver.save_data(wid, ftype, file_info.file_path.split('/')[-1], downloaded_file)
+    config.get_data_saver().save_data(wid, ftype, file_info.file_path.split('/')[-1], downloaded_file)
     bot.send_message(message.chat.id, "Файл успешно загружен")
 
 @bot.message_handler(commands=['start', 'help'])

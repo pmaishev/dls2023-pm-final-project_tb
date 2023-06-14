@@ -1,18 +1,13 @@
 """
 Main class for style transferring
 """
-import sys
-sys.path.insert(1, 'C:/Dev/dls2023-pm-final-project/bot')
-
-import matplotlib.pyplot as plt
+from PIL import Image
 import numpy as np
-
 import torch
 import torch.optim as optim
 from torchvision import transforms, models
-from model.data_processing import IDataLoader, CFileDataLoader
 from datetime import datetime
-from model.style_transfer2 import im_convert
+from model.data_processing import IDataLoader, CFileDataLoader
 
 class CStyleTransferConfig():
     def __init__(self):
@@ -28,8 +23,8 @@ class CStyleTransferConfig():
                 self.cnn[i] = torch.nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
 
         self.layers = {'0': 'conv1_1',
-                    '5': 'conv2_1', 
-                    '10': 'conv3_1', 
+                    '5': 'conv2_1',
+                    '10': 'conv3_1',
                     '19': 'conv4_1',
                     '21': 'conv4_2',  # content layer
                     '28': 'conv5_1'}
@@ -39,7 +34,7 @@ class CStyleTransferConfig():
                     'conv3_1': 0.2,
                     'conv4_1': 0.2,
                     'conv5_1': 0.2}
-        self.content_weight = 1 
+        self.content_weight = 1
         self.style_weight = 1e6
         self.epoch = 500
         self.optimizer = optim.Adam #LBFGS #Adam
@@ -68,19 +63,31 @@ class CStyleTransfer():
         batch_size, channels, height, width = tensor.size()
         tensor = tensor.view(batch_size * channels, height * width)
         gram = tensor @ tensor.t()
-        return gram 
+        return gram
 
     def load_and_transform_image(self, wid: str, ftype: str, shape=None):
-        image = self.config.get_data_loader().load_data(wid, ftype)
+        image_io = self.config.get_data_loader().load_data(wid, ftype)
+        image = Image.open(image_io).convert('RGB')
+
         size = shape or min(max(image.size), self.config.max_size)
         in_transform = transforms.Compose([
                             transforms.Resize(size),
                             transforms.ToTensor(),
-                            transforms.Normalize(self.config.mean_norm, 
+                            transforms.Normalize(self.config.mean_norm,
                                                 self.config.std_norm)])
 
         # discard the alpha channel (that's the :3) and add the batch dimension
         image = in_transform(image)[:3,:,:].unsqueeze(0)
+        return image
+
+    def im_convert(self, tensor):
+        # convert tesnor to image, denormalize
+        image = tensor.to("cpu").clone().detach()
+        image = image.numpy().squeeze()
+        image = image.transpose(1,2,0)
+        image = image * np.array(self.config.std_norm) + np.array(self.config.mean_norm)
+        image = image.clip(0, 1)
+
         return image
 
     def transfer(self, wid: str):
@@ -99,16 +106,13 @@ class CStyleTransfer():
         style_grams = {layer: self.gram_matrix(style_features[layer]) for layer in style_features}
 
         target_img = content_img.clone().requires_grad_(True).to(self.config.device)
-        show_every = 1000
         optimizer = self.config.optimizer([target_img], lr=3e-3)
-        num_epochs = 500 
 
-
-        for ii in range(1, num_epochs+1):
+        for i in range(self.config.epoch):
             target_features = self.get_features(target_img, self.config.cnn)
             content_loss = torch.mean((target_features[self.config.content_loss_layer] - content_features[self.config.content_loss_layer])**2)
             style_loss = 0
-            
+
             for layer in self.config.style_weights:
                 # get the "target" style representation for the layer
                 target_feature = target_features[layer]
@@ -126,12 +130,10 @@ class CStyleTransfer():
             optimizer.zero_grad()
             total_loss.backward()
             optimizer.step()
-            
-            # display intermediate images and print the loss
-            if  ii % show_every == 0:
-                #clear_output()
-                plt.imshow(im_convert(target_img))
-                plt.suptitle('Epoch %d/%d'%(ii, num_epochs))
-                plt.show()
 
-        return target_img
+            # display intermediate images and print the loss
+            if  i % 50 == 0:
+                dt = datetime.now()
+                print(f'{dt.strftime("%H:%M:%S")}: {i}/{self.config.epoch}')
+
+        return self.im_convert(target_img)
