@@ -33,7 +33,7 @@ def style_transfer_message(message, wid):
 def upload_main_file_process(message, wid):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        upload_file(message, wid, 'main')
+        upload_file(message, wid, 'content')
         message = bot.reply_to(message, "Отправьте изображение с стилем.")
         bot.register_next_step_handler(message, upload_style_file_process, wid)
     except Exception as e:
