@@ -22,7 +22,7 @@ config.data_loader = CFileDataLoader(basedir='C:/Dev/dls2023-pm-final-project/bo
 
 trans = CStyleTransfer(config)
 
-img = trans.transfer('00000000-0000-0000-0000-000000000000')
+img = trans.transfer('0123456789') #'00000000-0000-0000-0000-000000000000')
 plt.imshow(img)
 plt.show()
 

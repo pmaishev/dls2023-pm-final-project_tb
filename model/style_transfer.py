@@ -86,9 +86,8 @@ class CStyleTransfer():
         image = image.numpy().squeeze()
         image = image.transpose(1,2,0)
         image = image * np.array(self.config.std_norm) + np.array(self.config.mean_norm)
-        image = image.clip(0, 1)
 
-        return image
+        return image.clip(0, 255).astype('uint8')
 
     def transfer(self, wid: str):
         # load content
@@ -136,4 +135,4 @@ class CStyleTransfer():
                 dt = datetime.now()
                 print(f'{dt.strftime("%H:%M:%S")}: {i}/{self.config.epoch}')
 
-        return self.im_convert(target_img)
+        return Image.fromarray(self.im_convert(target_img), 'RGB')
