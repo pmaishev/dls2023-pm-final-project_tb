@@ -5,6 +5,7 @@ services:
 
 stages:
   - lint
+  - build-base
   - build
   - test
   - deploy
@@ -31,6 +32,21 @@ lint:
   except:
     changes:
       - "*.md"
+
+build-base:
+  stage: build-base
+  <<: *docker_login
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/base:latest -f build/DockerfileBase .
+    - docker push $CI_REGISTRY_IMAGE/base:latest
+    - echo $CI_REGISTRY_IMAGE/base:latest
+    - docker rmi $CI_REGISTRY_IMAGE/base:latest
+  only:
+    refs:
+      - main
+      - devel
+    changes:
+      - "requirements.txt"
 
 build:
   stage: build
