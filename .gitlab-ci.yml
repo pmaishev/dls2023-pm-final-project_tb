@@ -4,6 +4,7 @@ services:
   - docker:dind
 
 stages:
+  - lint
   - build
   - test
   - deploy
@@ -19,10 +20,26 @@ variables:
     PROJECT_NAME: bot
     VERSION: "$CI_PIPELINE_IID"
 
+lint:
+  stage: lint
+  image: python:3.8-slim
+  script:
+    - pip install -r requirements.txt
+    - pip install pylint
+    - pylint $(git ls-files '*.py') --max-line-length=140 -E
+  except:
+    changes:
+      - "*.md"
+
 build:
   stage: build
   script:
-    - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > bot/version.py
+    - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > version.py
+    - mkdir -p build/app/tmp
+    - cp *.py build/app
+    - cp requirements.txt build/app/
+    - cp -r model build/app
+    - cp -r data_test/00000000-0000-0000-0000-000000000000 build/app/tmp
     - docker build -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION -f build/Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
     - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION

@@ -13,7 +13,7 @@ class IDataSaver():
         raise NotImplementedError()
 
 class CFileDataLoader(IDataLoader):
-    def __init__(self, basedir: str='/tmp'):
+    def __init__(self, basedir: str='./tmp'):
         self.basedir = basedir
 
     def load_data(self, wid: str, ftype: str):
@@ -26,7 +26,7 @@ class CFileDataLoader(IDataLoader):
         return Image.open(f'{self.basedir}/{wid}/{name}').convert('RGB')
 
 class CFileDataSaver(IDataSaver):
-    def __init__(self, basedir: str='/tmp'):
+    def __init__(self, basedir: str='./tmp'):
         self.basedir = basedir
 
     def save_data(self, wid: str, ftype: str, name: str, data: bytes):
