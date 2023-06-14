@@ -27,7 +27,7 @@ lint:
   script:
     - pip install -r requirements.txt
     - pip install pylint
-    - "find ./ -iname \"*.py\"| xargs pylint --max-line-length=140 --generated-members=numpy.* ,torch.* -E"
+    - "find ./ -iname \"*.py\"| xargs pylint --max-line-length=140 --generated-members="numpy.* ,torch.*" -E"
   except:
     changes:
       - "*.md"
