@@ -9,8 +9,9 @@ stages:
   - test
   - deploy
 
-before_script:
-  - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+.docker_login_template: &docker_login
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
 variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -33,6 +34,7 @@ lint:
 
 build:
   stage: build
+  <<: *docker_login
   script:
     - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > version.py
     - mkdir -p build/app/tmp
@@ -56,6 +58,7 @@ build:
 
 test:
   stage: test
+  <<: *docker_login
   script:
     - echo "TODO Create tests"
   except:
@@ -65,6 +68,7 @@ test:
 deploy:
   stage: deploy
   image: pmaishev/rancher:6
+  <<: *docker_login
   script:
     - export RANCHER_URL=$RANCHER_DEV_URL
     - export RANCHER_ACCESS_KEY=$RANCHER_DEV_ACCESS_KEY
