@@ -14,7 +14,7 @@ stages:
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
-variables:
+variables: &base-variables
     GIT_SUBMODULE_STRATEGY: recursive
     DOCKER_REGISTRY: "registry.gitlab.com"
     DOCKER_USERNAME: "gitlab-ci-token"
@@ -23,6 +23,9 @@ variables:
     VERSION: "$CI_PIPELINE_IID"
 
 lint:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
   stage: lint
   image: python:3.8-slim
   script:
@@ -35,6 +38,9 @@ lint:
       - "*.md"
 
 build-base:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
   stage: build-base
   <<: *docker_login
   script:
@@ -52,6 +58,9 @@ build-base:
       - "build/DockerfileBase"
 
 build:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
   stage: build
   <<: *docker_login
   script:
@@ -76,6 +85,9 @@ build:
       - "*.md"
 
 test:
+  variables:
+      <<: *base-variables
+      GIT_STRATEGY: none
   stage: test
   <<: *docker_login
   script:
@@ -86,6 +98,9 @@ test:
 
 deploy:
   stage: deploy
+  variables:
+      <<: *base-variables
+      GIT_STRATEGY: none
   image: pmaishev/rancher:6
   <<: *docker_login
   script:
