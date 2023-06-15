@@ -1,29 +1,25 @@
 import sys
-sys.path.insert(1, 'C:/Dev/dls2023-pm-final-project/bot')
+import hashlib
+sys.path.insert(1, './')
 
 from model.data_processing import CFileDataLoader
 from model.style_transfer import CStyleTransferConfig, CStyleTransfer
-#from model.style_transfer2 import process
-import matplotlib.pyplot as plt
-import numpy as np
-
-def im_convert(tensor):
-    # convert tesnor to image, denormalize
-    image = tensor.to("cpu").clone().detach()
-    image = image.numpy().squeeze()
-    image = image.transpose(1,2,0)
-    image = image * np.array((0.229, 0.224, 0.225)) + np.array((0.485, 0.456, 0.406))
-    image = image.clip(0, 1)
-
-    return image
 
 config = CStyleTransferConfig()
-config.data_loader = CFileDataLoader(basedir='C:/Dev/dls2023-pm-final-project/bot/data_test')
+config.data_loader = CFileDataLoader(basedir='./data_test')
+config.epoch = 5
+config.max_size = 128
 
 trans = CStyleTransfer(config)
 
 img = trans.transfer('11111111-1111-1111-1111-11111111111')
-plt.imshow(img)
-plt.show()
+#img.show()
+digits = hashlib.md5(img.tobytes()).hexdigest()
+print(digits)
+assert('dceccefad2626f46e58b25c713c7b8bb'==digits)
 
-#process()
+img = trans.transfer('00000000-0000-0000-0000-000000000000')
+#img.show()
+digits = hashlib.md5(img.tobytes()).hexdigest()
+print(digits)
+assert('d474c601a5c6204c4a1f560500b3c10a'==digits)
