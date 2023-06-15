@@ -47,6 +47,8 @@ build-base:
       - devel
     changes:
       - "requirements.txt"
+      - "cnn/*"
+      - "build/DockerfileBase"
 
 build:
   stage: build

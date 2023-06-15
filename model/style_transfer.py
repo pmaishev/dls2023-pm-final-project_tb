@@ -1,6 +1,7 @@
 """
 Main class for style transferring
 """
+import os
 from PIL import Image
 import numpy as np
 import torch
@@ -12,12 +13,16 @@ from model.data_processing import IDataLoader, CFileDataLoader
 class CStyleTransferConfig():
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.max_size = 512 if self.device == 'cuda' else 256
+        self.max_size = 512 if self.device == 'cuda' else 128
         self.data_loader = CFileDataLoader()
         self.mean_norm = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.std_norm = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
-
-        self.cnn = models.vgg19(weights=models.VGG19_Weights.DEFAULT).features.to(self.device).eval().requires_grad_(False)
+        if os.path.isfile('/data/cnn/vgg19.pth'):
+            self.cnn = models.vgg19() # we do not specify ``weights``, i.e. create untrained model
+            self.cnn.load_state_dict(torch.load('/data/cnn/vgg19.pth'))
+        else:
+            self.cnn = models.vgg19(weights=models.VGG19_Weights.DEFAULT)
+        self.cnn = self.cnn.features.to(self.device).eval().requires_grad_(False)
         for (i, layer) in enumerate(self.cnn):
             if isinstance(layer, torch.nn.MaxPool2d):
                 self.cnn[i] = torch.nn.AvgPool2d(kernel_size=2, stride=2, padding=0)
@@ -36,7 +41,7 @@ class CStyleTransferConfig():
                     'conv5_1': 0.2}
         self.content_weight = 1
         self.style_weight = 1e6
-        self.epoch = 500
+        self.epoch = 2000
         self.optimizer = optim.Adam #LBFGS #Adam
 
     def get_data_loader(self) -> IDataLoader:
