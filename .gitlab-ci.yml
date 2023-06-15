@@ -4,10 +4,9 @@ services:
   - docker:dind
 
 stages:
-  - lint
+  - qa
   - build-base
   - build
-  - test
   - deploy
 
 .docker_login_template: &docker_login
@@ -22,11 +21,11 @@ variables: &base-variables
     PROJECT_NAME: bot
     VERSION: "$CI_PIPELINE_IID"
 
-lint:
+lint and test:
   variables:
       <<: *base-variables
       GIT_SUBMODULE_STRATEGY: recursive
-  stage: lint
+  stage: qa
   image: python:3.8-slim
   script:
     - pip install -r requirements.txt
@@ -80,18 +79,6 @@ build:
   only:
     - main
     - devel
-  except:
-    changes:
-      - "*.md"
-
-test:
-  variables:
-      <<: *base-variables
-      GIT_STRATEGY: none
-  stage: test
-  <<: *docker_login
-  script:
-    - echo "TODO Create tests"
   except:
     changes:
       - "*.md"
