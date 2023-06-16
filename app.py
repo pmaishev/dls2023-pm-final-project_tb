@@ -18,62 +18,61 @@ bot = telebot.TeleBot(config.token)
 #     p1 = Process(target=P_schedule.start_schedule, args=()).start()
 
 
-def style_transfer_message(message, wid):
+def style_transfer_message(message, content_url, style_url):
     """
     Process and return image with new style
     """
-    print(f"TODO: Files processing {message.chat.id}: {wid}")
+    links = {}
+    links['type'] = 'url'
+    links['content'] = content_url
+    links['style'] = style_url
+
+    print(f"Start files processing {message.chat.id}: {content_url.replace(config.token, 'XXXXX')} {style_url.replace(config.token, 'XXXXX')}")
     style_transfer = CStyleTransfer()
 
-    bot.send_message(message.chat.id, "Start")
-    bot.send_photo(message.chat.id, photo=style_transfer.transfer(wid))
+    bot.send_photo(message.chat.id, photo=style_transfer.transfer(links))
     bot.send_message(message.chat.id, "Done")
 
     ################
-def upload_main_file_process(message, wid):
+def upload_main_file_process(message):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        upload_file(message, wid, 'content')
-        message = bot.reply_to(message, "Отправьте изображение с стилем.")
-        bot.register_next_step_handler(message, upload_style_file_process, wid)
+        file_info = bot.get_file(message.photo[2].file_id)
+        content_url = config.format_file_url(file_info)
+        message = bot.reply_to(message, config.style_upload_template)
+        bot.register_next_step_handler(message, upload_style_file_process, content_url)
     except Exception as e:
         print(str(e))
         bot.send_message(message.chat.id, "Ошибка! Отправьте изображение")
         #bot.register_next_step_handler(message, files_process)
 
-def upload_style_file_process(message, wid):
+def upload_style_file_process(message, content_url):
     bot.send_chat_action(message.chat.id, 'typing')
     try:
-        upload_file(message, wid, 'style')
-        bot.reply_to(message, f'Пойду, перенесу стиль с картинки на картинку, {message.from_user.first_name}')
-        thread = threading.Thread(target=style_transfer_message, args=[message, wid])
+        file_info = bot.get_file(message.photo[2].file_id)
+        style_url = config.format_file_url(file_info)
+        bot.reply_to(message, config.start_process_template.format(message.from_user.first_name))
+        thread = threading.Thread(target=style_transfer_message, args=[message, content_url, style_url])
         thread.start()
     except Exception as e:
         print(str(e))
         bot.send_message(message.chat.id, "Ошибка! Отправьте изображение стиля.")
         #bot.register_next_step_handler(message, files_process)
 
-def upload_file(message, wid, ftype):
-    file_info = bot.get_file(message.photo[2].file_id)
-    downloaded_file = bot.download_file(file_info.file_path)
-    config.get_data_saver().save_data(wid, ftype, file_info.file_path.split('/')[-1], downloaded_file)
-    bot.send_message(message.chat.id, "Файл успешно загружен")
-
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     """
     Welcome message from bot.
     """
-    bot.reply_to(message, f'Я бот. Приятно познакомиться, {message.from_user.first_name}')
+    bot.reply_to(message, config.help_template.format(message.from_user.first_name))
 
 @bot.message_handler(commands=['transfer_style'])
 def send_transfered_image(message):
     """
     Upload image and process it
     """
-    wid = str(uuid.uuid4())
-    message = bot.reply_to(message, "Отправьте файл с основным изображением.")
-    bot.register_next_step_handler(message, upload_main_file_process, wid)
+    message = bot.reply_to(message, config.content_upload_template)
+    bot.register_next_step_handler(message, upload_main_file_process)
 
 if __name__ == '__main__':
     # start_process()

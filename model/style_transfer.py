@@ -2,19 +2,19 @@
 Main class for style transferring
 """
 import os
+import requests
+from io import BytesIO
 from PIL import Image
 import numpy as np
 import torch
 import torch.optim as optim
 from torchvision import transforms, models
 from datetime import datetime
-from model.data_processing import IDataLoader, CFileDataLoader
 
 class CStyleTransferConfig():
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.max_size = 512 if self.device == 'cuda' else 128
-        self.data_loader = CFileDataLoader()
         self.mean_norm = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.std_norm = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
         if os.path.isfile('/data/cnn/vgg19.pth'):
@@ -44,9 +44,6 @@ class CStyleTransferConfig():
         self.epoch = 2000
         self.optimizer = optim.Adam #LBFGS #Adam
 
-    def get_data_loader(self) -> IDataLoader:
-        return self.data_loader
-
 class CStyleTransfer():
     def __init__(self, config: CStyleTransferConfig = CStyleTransferConfig()):
         self.config = config
@@ -70,8 +67,15 @@ class CStyleTransfer():
         gram = tensor @ tensor.t()
         return gram
 
-    def load_and_transform_image(self, wid: str, ftype: str, shape=None):
-        image_io = self.config.get_data_loader().load_data(wid, ftype)
+    def load_and_transform_image(self, path: str, ftype: str, shape=None):
+        if ftype == 'url':
+            image_io = BytesIO(requests.get(path).content)
+        elif ftype == 'file':
+            image_io = open(path, 'rb')
+        elif ftype == 's3':
+            raise NotImplementedError()
+        else:
+            raise ValueError(f'{ftype} is not valid ftype. ftype must be url, file or s3')
         image = Image.open(image_io).convert('RGB')
 
         size = shape or min(max(image.size), self.config.max_size)
@@ -94,11 +98,11 @@ class CStyleTransfer():
 
         return (image.clip(0, 1)*255).astype('uint8')
 
-    def transfer(self, wid: str):
+    def transfer(self, links: dict):
         # load content
-        content_img = self.load_and_transform_image(wid, 'content').to(self.config.device)
+        content_img = self.load_and_transform_image(links['content'], links.get('type', 'url')).to(self.config.device)
         # load styles, resize style to content
-        style_img = self.load_and_transform_image(wid, 'style', shape=content_img.shape[-2:]).to(self.config.device)
+        style_img = self.load_and_transform_image(links['style'], links.get('type', 'url'), shape=content_img.shape[-2:]).to(self.config.device)
         # TODO: load mask, do not normalize and resize mask, sicne we will resize and binarize it later anyway
         # try:
         #     mask = self.config.get_data_loader().load_data(wid, 'mask')
