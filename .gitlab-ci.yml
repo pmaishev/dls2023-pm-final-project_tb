@@ -64,7 +64,7 @@ build:
   <<: *docker_login
   script:
     - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > version.py
-    - mkdir -p build/app/tmp
+    - mkdir -p build/app/data_test
     - cp *.py build/app
     - cp requirements.txt build/app/
     - cp -r model build/app
