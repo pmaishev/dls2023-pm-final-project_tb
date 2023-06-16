@@ -68,7 +68,7 @@ build:
     - cp *.py build/app
     - cp requirements.txt build/app/
     - cp -r model build/app
-    - cp -r data_test/00000000-0000-0000-0000-000000000000 build/app/tmp
+    - cp -r data_test/* build/app/data_test
     - docker build -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION -f build/Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
     - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
