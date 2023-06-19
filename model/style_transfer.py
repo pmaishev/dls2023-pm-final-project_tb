@@ -41,7 +41,7 @@ class CStyleTransferConfig():
                     'conv5_1': 0.2}
         self.content_weight = 1
         self.style_weight = 1e6
-        self.epoch = 2000
+        self.epoch = 50
         self.optimizer = optim.LBFGS #LBFGS #Adam
 
 class CStyleTransfer():

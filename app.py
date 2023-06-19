@@ -43,8 +43,8 @@ def upload_main_file_process(message):
         bot.register_next_step_handler(message, upload_style_file_process, content_url)
     except Exception as e:
         print(str(e))
-        bot.send_message(message.chat.id, "Ошибка! Отправьте изображение")
-        #bot.register_next_step_handler(message, files_process)
+        bot.send_message(message.chat.id, "Ошибка! Отправьте основное изображение.")
+        bot.register_next_step_handler(message, upload_main_file_process)
 
 def upload_style_file_process(message, content_url):
     bot.send_chat_action(message.chat.id, 'typing')
@@ -57,7 +57,7 @@ def upload_style_file_process(message, content_url):
     except Exception as e:
         print(str(e))
         bot.send_message(message.chat.id, "Ошибка! Отправьте изображение стиля.")
-        #bot.register_next_step_handler(message, files_process)
+        bot.register_next_step_handler(message, upload_style_file_process, content_url)
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
@@ -65,6 +65,8 @@ def send_welcome(message):
     Welcome message from bot.
     """
     bot.reply_to(message, config.help_template.format(message.from_user.first_name))
+    if config.transfer_config.device == 'cpu':
+        bot.send_message(message.chat.id, config.sorry_for_cpu_template)
 
 @bot.message_handler(commands=['transfer_style'])
 def send_transfered_image(message):
