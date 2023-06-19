@@ -42,7 +42,7 @@ class CStyleTransferConfig():
         self.content_weight = 1
         self.style_weight = 1e6
         self.epoch = 2000
-        self.optimizer = optim.Adam #LBFGS #Adam
+        self.optimizer = optim.LBFGS #LBFGS #Adam
 
 class CStyleTransfer():
     def __init__(self, config: CStyleTransferConfig = CStyleTransferConfig()):
@@ -114,32 +114,38 @@ class CStyleTransfer():
         style_grams = {layer: self.gram_matrix(style_features[layer]) for layer in style_features}
 
         target_img = content_img.clone().requires_grad_(True).to(self.config.device)
-        optimizer = self.config.optimizer([target_img], lr=3e-3)
+        optimizer = self.config.optimizer([target_img])
 
         for i in range(self.config.epoch):
-            target_features = self.get_features(target_img, self.config.cnn)
-            content_loss = torch.mean((target_features[self.config.content_loss_layer] - content_features[self.config.content_loss_layer])**2)
-            style_loss = 0
+            def closure():
+                # with torch.no_grad():
+                #     target_img.clamp_(0, 1)
 
-            for layer in self.config.style_weights:
-                # get the "target" style representation for the layer
-                target_feature = target_features[layer]
-                target_gram = self.gram_matrix(target_feature)
-                _, d, h, w = target_feature.shape
-                # get the "style" style representation
-                style_gram = style_grams[layer]
-                # the style loss for one layer, weighted appropriately
-                layer_style_loss = 2*self.config.style_weights[layer]*torch.mean((target_gram - style_gram)**2)
-                # add to the style loss
-                style_loss += layer_style_loss / (d*h*w)
+                optimizer.zero_grad()
+                target_features = self.get_features(target_img, self.config.cnn)
+                content_loss = torch.mean((target_features[self.config.content_loss_layer] - content_features[self.config.content_loss_layer])**2)
+                style_loss = 0
 
-            total_loss = self.config.content_weight*content_loss + self.config.style_weight*style_loss
-            # update your target image
-            optimizer.zero_grad()
-            total_loss.backward()
-            optimizer.step()
+                for layer in self.config.style_weights:
+                    # get the "target" style representation for the layer
+                    target_feature = target_features[layer]
+                    target_gram = self.gram_matrix(target_feature)
+                    _, d, h, w = target_feature.shape
+                    # get the "style" style representation
+                    style_gram = style_grams[layer]
+                    # the style loss for one layer, weighted appropriately
+                    layer_style_loss = 2*self.config.style_weights[layer]*torch.mean((target_gram - style_gram)**2)
+                    # add to the style loss
+                    style_loss += layer_style_loss / (d*h*w)
 
-            # display intermediate images and print the loss
+                total_loss = self.config.content_weight*content_loss + self.config.style_weight*style_loss
+                # update your target image
+                total_loss.backward()
+
+                # display intermediate images and print the loss
+                return self.config.content_weight*content_loss + self.config.style_weight*style_loss
+
+            optimizer.step(closure)
             if  i % 50 == 0:
                 dt = datetime.now()
                 print(f'{dt.strftime("%H:%M:%S")}: {i}/{self.config.epoch}')
