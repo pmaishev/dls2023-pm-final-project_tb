@@ -5,8 +5,8 @@ sys.path.insert(1, './')
 from model.style_transfer import CStyleTransferConfig, CStyleTransfer
 
 config = CStyleTransferConfig()
-config.epoch = 50
-config.max_size = 512
+config.epoch = 5
+config.max_size = 128
 
 trans = CStyleTransfer(config)
 links = {}
@@ -26,11 +26,6 @@ img.show()
 digits = hashlib.md5(img.tobytes()).hexdigest()
 print(digits)
 # #assert('dceccefad2626f46e58b25c713c7b8bb'==digits)
-# config.style_weights = {'conv1_1': 1.,
-#                      'conv2_1': 1.,
-#                      'conv3_1': 1.,
-#                      'conv4_1': 1.,
-#                      'conv5_1': 1.}
 
 links['content'] = './data_test/2/dancing.jpg'
 links['style'] = './data_test/2/picasso.jpg'
