@@ -65,7 +65,7 @@ def send_welcome(message):
     Welcome message from bot.
     """
     bot.reply_to(message, config.help_template.format(message.from_user.first_name))
-    if config.transfer_config.device == 'cpu':
+    if config.transfer_config.device.type == 'cpu':
         bot.send_message(message.chat.id, config.sorry_for_cpu_template)
 
 @bot.message_handler(commands=['transfer_style'])

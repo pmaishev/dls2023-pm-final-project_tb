@@ -14,7 +14,7 @@ from datetime import datetime
 class CStyleTransferConfig():
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.max_size = 512 if self.device == 'cuda' else 128
+        self.max_size = 128 if self.device.type == 'cpu' else 512
         self.mean_norm = torch.tensor([0.485, 0.456, 0.406]).to(self.device)
         self.std_norm = torch.tensor([0.229, 0.224, 0.225]).to(self.device)
         if os.path.isfile('/data/cnn/vgg19.pth'):
