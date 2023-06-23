@@ -4,8 +4,8 @@ services:
   - docker:dind
 
 stages:
-  - qa
   - build-base
+  - qa
   - build
   - deploy
 
@@ -55,6 +55,7 @@ build-base:
       - "requirements.txt"
       - "cnn/*"
       - "build/DockerfileBase"
+      - ".gitlab-ci.yml"
 
 build:
   variables:
