@@ -10,6 +10,7 @@ import uuid
 import telebot
 from config import CBotConfig
 from model.style_transfer import CStyleTransfer
+from model.style_transfer_msg import CStyleTransferMsg
 
 config = CBotConfig()
 bot = telebot.TeleBot(config.token)
@@ -28,7 +29,7 @@ def style_transfer_message(message, content_url, style_url):
     links['style'] = style_url
 
     print(f"Start files processing {message.chat.id}: {content_url.replace(config.token, 'XXXXX')} {style_url.replace(config.token, 'XXXXX')}")
-    style_transfer = CStyleTransfer()
+    style_transfer = CStyleTransferMsg()
 
     bot.send_photo(message.chat.id, photo=style_transfer.transfer(links))
     bot.send_message(message.chat.id, "Done")

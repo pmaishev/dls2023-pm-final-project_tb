@@ -1,6 +1,8 @@
 # Notebook display
 from PIL import Image
 import matplotlib.pyplot as plt
+import requests
+from io import BytesIO
 
 # PyTorch
 import torch
@@ -13,6 +15,8 @@ class CMsgStyleTransferConfig():
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.weights_path = '/data/cnn/vgg19.pth'
+        self.size = 1280
+#        self.
 
 
 class CoMatchLayer(Module):
@@ -103,6 +107,11 @@ class MSGNet(Module):
         inputs = inputs.view(BS, C, H * W)
         GM = inputs.bmm(inputs.transpose(1, 2))
         return GM.div_(C * H * W)
+    # def gram_matrix(self, tensor):
+    #     batch_size, channels, height, width = tensor.size()
+    #     tensor = tensor.view(batch_size * channels, height * width)
+    #     gram = tensor @ tensor.t()
+    #     return gram
 
     def set_targets(self, x):
         targets = self.siamese_network(x)
@@ -112,8 +121,55 @@ class MSGNet(Module):
     def forward(self, x):
         return self.transformation_network(x)
 
-class CStyleTransferMgs():
+class CStyleTransferMsg():
     def __init__(self, config: CMsgStyleTransferConfig = CMsgStyleTransferConfig()):
         self.config = config
-        self.mgs_net = MSGNet().to(config.device)
+        self.msg_net = MSGNet().to(config.device)
         self.msg_net.load_state_dict(torch.load(config.weights_path))
+
+    def load_and_transform_image(self, path: str, ftype: str, shape=None):
+        if ftype == 'url':
+            image_io = BytesIO(requests.get(path).content)
+        elif ftype == 'file':
+            image_io = open(path, 'rb')
+        elif ftype == 's3':
+            raise NotImplementedError()
+        else:
+            raise ValueError(f'{ftype} is not valid ftype. ftype must be url, file or s3')
+        image = Image.open(image_io).convert('RGB')
+        return image
+
+    def prep(self, image, keep_aspect_ratio=False, to_tensor=False):
+        image = image.convert('RGB')
+        if keep_aspect_ratio:
+            size2 = int(self.config.size / image.size[0] * image.size[1])
+            image = image.resize((self.config.size, size2), Image.LANCZOS)
+        else:
+            image = image.resize((self.config.size, self.config.size), Image.LANCZOS)
+        if to_tensor:
+            image2tensor = transforms.Compose([transforms.ToTensor(),
+                                            transforms.Lambda(lambda x: x[torch.LongTensor([2, 1, 0])]),
+                                            transforms.Lambda(lambda x: x.mul_(255))])
+            return image2tensor(image).unsqueeze(0).to(self.config.device)
+        else:
+            return image
+
+    def post(self, tensor):
+        tensor = tensor.detach().cpu().squeeze(0).clamp_(0, 255)
+        tensor2image = transforms.Compose([transforms.Lambda(lambda x: x.div_(255)),
+                                        transforms.Lambda(lambda x: x[torch.LongTensor([2, 1, 0])]),
+                                        transforms.ToPILImage()])
+        return tensor2image(tensor)
+
+    def transfer(self, links: dict):
+        # load content
+        content_img = self.load_and_transform_image(links['content'], links.get('type', 'url'))
+        # load styles, resize style to content
+        style_img = self.load_and_transform_image(links['style'], links.get('type', 'url'))
+        content, style = self.prep(content_img, keep_aspect_ratio=True, to_tensor=True), self.prep(style_img, to_tensor=True)
+        self.msg_net.set_targets(style)
+        self.msg_net.eval()
+        with torch.no_grad():
+            res = self.msg_net(content)
+        return self.post(res)
+

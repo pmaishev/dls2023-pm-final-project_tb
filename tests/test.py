@@ -3,6 +3,7 @@ import hashlib
 sys.path.insert(1, './')
 
 from model.style_transfer import CStyleTransferConfig, CStyleTransfer
+from model.style_transfer_msg import CMsgStyleTransferConfig, CStyleTransferMsg
 
 config = CStyleTransferConfig()
 config.epoch = 0
@@ -34,3 +35,15 @@ img = trans.transfer(links)
 digits = hashlib.md5(img.tobytes()).hexdigest()
 print(digits)
 assert('5408f69c00fe468a7a76b133b834f298'==digits)
+config = CMsgStyleTransferConfig()
+config.weights_path = './cnn/msgnet_21_styles.pth'
+
+trans = CStyleTransferMsg(config)
+links = {}
+links['type'] = 'file'
+links['content'] = './data_test/1/content_IMG_7359.jpg'
+links['style'] = './data_test/1/style_IMG_7580.jpg'
+img = trans.transfer(links)
+digits = hashlib.md5(img.tobytes()).hexdigest()
+print(digits)
+assert('3b742e8095aa0bfd1a0206c258c28d88'==digits)
