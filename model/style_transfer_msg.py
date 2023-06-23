@@ -48,7 +48,7 @@ class ConvBlock(Module):
 
     def forward(self, x):
         if self.upsample:
-            x = self.upsample(x)
+            x = self.upsample(x) # pylint:disable=E1102
         if self.padding:
             x = self.padding(x)
         return self.conv(x)
@@ -74,9 +74,9 @@ class ResBlock(Module):
     def forward(self, x):
         residual = x
         if self.down_conv:
-            residual = self.down_conv(x)
+            residual = self.down_conv(x) # pylint:disable=E1102
         if self.up_conv:
-            residual = self.up_conv(x)
+            residual = self.up_conv(x) # pylint:disable=E1102
         return self.conv_block(x) + residual
 
 
@@ -170,6 +170,6 @@ class CStyleTransferMsg():
         self.msg_net.set_targets(style)
         self.msg_net.eval()
         with torch.no_grad():
-            res = self.msg_net(content)
+            res = self.msg_net(content) # pylint:disable=E1102
         return self.post(res)
 
