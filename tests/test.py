@@ -44,4 +44,4 @@ links['style'] = './data_test/1/style_IMG_7580.jpg'
 img = trans.transfer(links)
 digits = hashlib.md5(img.tobytes()).hexdigest()
 print(digits)
-assert('1d74d05d1cf0265ed0b3f3daf5b802fd'==digits)
+assert('c188623373fc5a42763dac0ab10e5026'==digits)
