@@ -1,12 +1,7 @@
 """
 Telegram bot for style transfering
 """
-import time
-import os
-#from multiprocessing import *
-#import schedule
 import threading
-import uuid
 import telebot
 from config import CBotConfig
 from model.style_transfer import CStyleTransfer
@@ -35,6 +30,9 @@ def style_transfer_message(message, content_url, style_url, target):
 
     ################
 def upload_main_file_process(message, target):
+    """
+    Upload image with content
+    """
     bot.send_chat_action(message.chat.id, 'typing')
     try:
         file_info = bot.get_file(message.photo[2].file_id)
@@ -43,10 +41,13 @@ def upload_main_file_process(message, target):
         bot.register_next_step_handler(message, upload_style_file_process, content_url, target)
     except Exception as e:
         print(str(e))
-        bot.send_message(message.chat.id, "Ошибка! Отправьте основное изображение.")
+        bot.send_message(message.chat.id, config.content_error_template)
         bot.register_next_step_handler(message, upload_main_file_process, target)
 
 def upload_style_file_process(message, content_url, target):
+    """
+    Upload image with style
+    """
     bot.send_chat_action(message.chat.id, 'typing')
     try:
         file_info = bot.get_file(message.photo[2].file_id)
@@ -56,7 +57,7 @@ def upload_style_file_process(message, content_url, target):
         thread.start()
     except Exception as e:
         print(str(e))
-        bot.send_message(message.chat.id, "Ошибка! Отправьте изображение стиля.")
+        bot.send_message(message.chat.id, config.style_upload_template)
         bot.register_next_step_handler(message, upload_style_file_process, content_url, target)
 
 @bot.message_handler(commands=['start', 'help'])
@@ -68,7 +69,7 @@ def send_welcome(message):
     if config.transfer_config.device.type == 'cpu':
         bot.send_message(message.chat.id, config.sorry_for_cpu_template)
 
-@bot.message_handler(commands=['transfer_style'])
+@bot.message_handler(commands=['transfer_style', 'transfer_style_slow'])
 def send_transfered_image(message):
     """
     Upload image and process it
