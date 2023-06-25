@@ -24,6 +24,7 @@ bot
 │
 ├───cnn
 │       vgg19.pth
+│       msgnet_21_styles.pth
 │
 ├───data_test
 │   ├───0
@@ -43,6 +44,7 @@ bot
 │
 ├───model
 │       style_transfer.py
+│       style_transfer_msg.py
 │
 └───tests
         test.py
@@ -66,12 +68,14 @@ Github actions для CI/CD на github
 
 ### cnn folder
 1. `vgg19.pth` - сохраненный VGG19 с весами, чтобы не загружать каждый раз при обновдении бота.
+1. `msgnet_21_styles.pth` - сохраненные веса MSG Net.
 
 ### data_test folder
 Тестовые данные.
 
 ### model folder
 1. `style_transfer.py` класс для переноса стиля и его конфигурация.
+1. `style_transfer_msg.py` классы для быстрого переноса стиля и его конфигурация. https://arxiv.org/abs/1703.06953
 
 ### tests folder
 Тесты.
@@ -79,7 +83,8 @@ Github actions для CI/CD на github
 ## Команды бота
 1. `/start` - выводит краткое описание бота.
 1. `/help` - аналогично предыдущей команде.
-1. `style_transfer` - запращивает два изображения и переносит стиль с одного на другое.
+1. `style_transfer` - запращивает два изображения и переносит стиль с одного на другое при помощи MSG Net.
+1. `style_transfer_slow` - запращивает два изображения и переносит стиль с одного на другое.
 
 ## Roadmap
 TODO: If you have ideas for releases in the future, it is a good idea to list them in the README.
