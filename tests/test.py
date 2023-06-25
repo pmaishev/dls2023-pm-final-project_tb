@@ -39,11 +39,9 @@ config = CMsgStyleTransferConfig()
 config.weights_path = './cnn/msgnet_21_styles.pth'
 
 trans = CStyleTransferMsg(config)
-links = {}
-links['type'] = 'file'
 links['content'] = './data_test/1/content_IMG_7359.jpg'
 links['style'] = './data_test/1/style_IMG_7580.jpg'
 img = trans.transfer(links)
 digits = hashlib.md5(img.tobytes()).hexdigest()
 print(digits)
-assert('4865adb64aa0c4904ca87ed8b1f95c94'==digits)
+assert('1d74d05d1cf0265ed0b3f3daf5b802fd'==digits)

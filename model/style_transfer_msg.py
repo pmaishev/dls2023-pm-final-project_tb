@@ -14,8 +14,8 @@ from torch.nn import Module, Parameter, Sequential, Upsample, ReflectionPad2d, C
 class CMsgStyleTransferConfig():
     def __init__(self):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.weights_path = '/data/cnn/vgg19.pth'
-        self.size = 1280
+        self.weights_path = '/data/cnn/msgnet_21_styles.pth'
+        self.size = 1024
 #        self.
 
 
