@@ -1,4 +1,4 @@
-FROM registry.gitlab.com/dls2023-pm-final-project/bot/base
+FROM ghcr.io/pmaishev/dls2023-pm-final-project_tb/base:latest
 COPY build/app /opt/
 WORKDIR /opt/
 ENV PYTHONPATH "${PYTHONPATH}:/opt"
