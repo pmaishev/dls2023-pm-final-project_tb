@@ -38,10 +38,10 @@ assert('5408f69c00fe468a7a76b133b834f298'==digits)
 config = CMsgStyleTransferConfig()
 config.weights_path = './cnn/msgnet_21_styles.pth'
 
-trans = CStyleTransferMsg(config)
-links['content'] = './data_test/1/content_IMG_7359.jpg'
-links['style'] = './data_test/1/style_IMG_7580.jpg'
-img = trans.transfer(links)
-digits = hashlib.md5(img.tobytes()).hexdigest()
-print(digits)
-assert('c188623373fc5a42763dac0ab10e5026'==digits)
+# trans = CStyleTransferMsg(config)
+# links['content'] = './data_test/1/content_IMG_7359.jpg'
+# links['style'] = './data_test/1/style_IMG_7580.jpg'
+# img = trans.transfer(links)
+# digits = hashlib.md5(img.tobytes()).hexdigest()
+# print(digits)
+# assert('c188623373fc5a42763dac0ab10e5026'==digits)

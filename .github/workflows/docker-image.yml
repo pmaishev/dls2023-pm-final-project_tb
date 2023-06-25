@@ -37,6 +37,7 @@ jobs:
         docker rmi ghcr.io/pmaishev/dls2023-pm-final-project_tb/base:latest
   lint:
     runs-on: ubuntu-latest
+    needs: build-base
     strategy:
       matrix:
         python-version: ["3.8"]
@@ -57,7 +58,7 @@ jobs:
         python tests/test.py
   build:
     runs-on: ubuntu-latest
-    needs: [lint, build-base]
+    needs: lint
     steps:
     - uses: actions/checkout@v3
     - name: Login to Github Packages
