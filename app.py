@@ -74,7 +74,7 @@ def send_transfered_image(message):
     """
     Upload image and process it
     """
-    target = CStyleTransferMsg if message.text.split[0] == '/transfer_style' else CStyleTransfer
+    target = CStyleTransferMsg if message.text.split()[0] == '/transfer_style' else CStyleTransfer
     message = bot.reply_to(message, config.content_upload_template)
     bot.register_next_step_handler(message, upload_main_file_process, target)
 
