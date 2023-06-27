@@ -7,7 +7,7 @@ from model.style_transfer import CStyleTransferConfig
 class CBotConfig():
     def __init__(self):
         self.token = os.environ['TG_BOT_TOKEN']
-        self.help_template = '''Я бот. Приятно познакомиться, {}.
+        self.help_template = '''Я бот, написанный в рамках итогового проекта https://stepik.org/course/135003. Приятно познакомиться, {}.
 Я умею переносить стиль с одного изображения на другое.
 Реализованно на основе https://arxiv.org/abs/1703.06953 и https://github.com/zhanghang1989/PyTorch-Multi-Style-Transfer.
 Для начала работы надо ввести /transfer_style, а потом загрузить основное изображение и изображение с стилем.
