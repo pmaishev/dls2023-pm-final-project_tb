@@ -4,14 +4,16 @@ services:
   - docker:dind
 
 stages:
+  - build-base
+  - qa
   - build
-  - test
   - deploy
 
-before_script:
-  - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
+.docker_login_template: &docker_login
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $DOCKER_REGISTRY --username $DOCKER_USERNAME --password-stdin
 
-variables:
+variables: &base-variables
     GIT_SUBMODULE_STRATEGY: recursive
     DOCKER_REGISTRY: "registry.gitlab.com"
     DOCKER_USERNAME: "gitlab-ci-token"
@@ -19,10 +21,55 @@ variables:
     PROJECT_NAME: bot
     VERSION: "$CI_PIPELINE_IID"
 
-build:
-  stage: build
+lint and test:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
+  stage: qa
+  image: python:3.8-slim
   script:
-    - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > bot/version.py
+    - pip install -r requirements.txt
+    - pip install pylint
+    - find ./ -iname "*.py"| xargs pylint --max-line-length=140 --generated-members="numpy.* ,torch.*" -E
+    - python tests/test.py
+  except:
+    changes:
+      - "*.md"
+
+build-base:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
+  stage: build-base
+  <<: *docker_login
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/base:latest -f build/DockerfileBase .
+    - docker push $CI_REGISTRY_IMAGE/base:latest
+    - echo $CI_REGISTRY_IMAGE/base:latest
+    - docker rmi $CI_REGISTRY_IMAGE/base:latest
+  only:
+    refs:
+      - main
+      - devel
+    changes:
+      - "requirements.txt"
+      - "cnn/*"
+      - "build/DockerfileBase"
+      - ".gitlab-ci.yml"
+
+build:
+  variables:
+      <<: *base-variables
+      GIT_SUBMODULE_STRATEGY: recursive
+  stage: build
+  <<: *docker_login
+  script:
+    - echo "ver = \"$GROUP_NAME $PROJECT_NAME $CI_COMMIT_REF_NAME $VERSION\"" > version.py
+    - mkdir -p build/app/data_test
+    - cp *.py build/app
+    - cp requirements.txt build/app/
+    - cp -r model build/app
+    - cp -r data_test/* build/app/data_test
     - docker build -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION -f build/Dockerfile .
     - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
     - echo $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_NAME:$VERSION
@@ -37,17 +84,13 @@ build:
     changes:
       - "*.md"
 
-test:
-  stage: test
-  script:
-    - echo "TODO Create tests"
-  except:
-    changes:
-      - "*.md"
-
 deploy:
   stage: deploy
+  variables:
+      <<: *base-variables
+      GIT_STRATEGY: none
   image: pmaishev/rancher:6
+  <<: *docker_login
   script:
     - export RANCHER_URL=$RANCHER_DEV_URL
     - export RANCHER_ACCESS_KEY=$RANCHER_DEV_ACCESS_KEY

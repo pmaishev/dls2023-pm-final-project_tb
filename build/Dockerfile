@@ -1,8 +1,5 @@
-FROM python:3.8-slim
-
-COPY requirements.txt /tmp/
-RUN pip install -r /tmp/requirements.txt
-COPY bot /opt/bot 
+FROM ghcr.io/pmaishev/dls2023-pm-final-project_tb/base:latest
+COPY build/app /opt/
 WORKDIR /opt/
 ENV PYTHONPATH "${PYTHONPATH}:/opt"
-CMD ["python", "/opt/bot/pe_bot.py"]
+CMD ["python", "/opt/app.py"]
