@@ -86,14 +86,12 @@ Github actions для CI/CD на github
 1. `style_transfer` - запращивает два изображения и переносит стиль с одного на другое при помощи MSG Net.
 1. `style_transfer_slow` - запращивает два изображения и переносит стиль с одного на другое.
 
-## Roadmap
-TODO: If you have ideas for releases in the future, it is a good idea to list them in the README.
-
 ## Authors and acknowledgment
-Автор: Petr Maishev
-Email: pmaishev@gmail.com
-StepikId: 82457743
-Telegram Id: @pmaishev
+- Автор: Petr Maishev
+- Email: pmaishev@gmail.com
+- StepikId: 82457743
+- Telegram Id: @pmaishev
 
 ## Roadmap
-TODO: If you have ideas for releases in the future, it is a good idea to list them in the README.
+1. TODO: Model to ONNX
+1. TODO: Fit model to my own styles
