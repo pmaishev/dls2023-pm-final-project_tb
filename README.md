@@ -1,10 +1,7 @@
-# Telegram bot
-Итоговый проект курса [Deep Learning (семестр 1, весна 2023): продвинутый поток](https://stepik.org/course/135003/syllabus)
+# Telegram Bot
+Final project for the course [Deep Learning (Semester 1, Spring 2023): Advanced Track](https://stepik.org/course/135003/syllabus)
 
-## Annotation.
-[[_TOC_]]
-
-## Структура проекта
+## Project Structure
 ```
 bot
 │   .gitignore
@@ -50,48 +47,48 @@ bot
         test.py
 
 ```
-### root folder
-В корневой директории находятся следующие файлы:
-1. `app.py` - основной файл проекта с ботом
-1. `config.py` - конфигурация и шаблоны сообщений бота
-1. `requirements.txt` - необходимые библиотеки
-1. `README.md` - описание проекта (этот файл)
-1. `.gitignore` - список того, что не сохраняем в гит
-1. `.gitlab-ci.yml` - настройка CI/CD для GitLab
+### Root Folder
+The root directory contains the following files:
+1. `app.py` - The main project file containing the bot.
+2. `config.py` - Configuration and message templates for the bot.
+3. `requirements.txt` - Required libraries.
+4. `README.md` - Project description (this file).
+5. `.gitignore` - List of files and directories to ignore in Git.
+6. `.gitlab-ci.yml` - CI/CD configuration for GitLab.
 
 ### .github folder
-Github actions для CI/CD на github
+Github Actions for CI/CD on GitHub.
 
-### build folder
-1. `Dockerfile` - dockerfile для бота
-1. `DockerfileBase` - базовый dockerfile, от которого строится бот. Сделан для того, чтобы не пересобирать все с нуля при каждом коммите.
+### build Folder
+1. `Dockerfile` - Dockerfile for the bot.
+2. `DockerfileBase` - Base Dockerfile from which the bot is built. Created to avoid rebuilding everything from scratch with each commit.
 
-### cnn folder
-1. `vgg19.pth` - сохраненный VGG19 с весами, чтобы не загружать каждый раз при обновдении бота.
-1. `msgnet_21_styles.pth` - сохраненные веса MSG Net.
+### cnn Folder
+1. `vgg19.pth` - Saved VGG19 model with weights to avoid reloading it every time the bot is updated.
+2. `msgnet_21_styles.pth` - Saved weights for MSG Net.
 
-### data_test folder
-Тестовые данные.
+### data_test Folder
+Test data.
 
-### model folder
-1. `style_transfer.py` класс для переноса стиля и его конфигурация.
-1. `style_transfer_msg.py` классы для быстрого переноса стиля и его конфигурация. https://arxiv.org/abs/1703.06953
+### model Folder
+1. `style_transfer.py` - Class for style transfer and its configuration.
+2. `style_transfer_msg.py` - Classes for fast style transfer and its configuration. https://arxiv.org/abs/1703.06953
 
-### tests folder
-Тесты.
+### tests Folder
+Tests.
 
-## Команды бота
-1. `/start` - выводит краткое описание бота.
-1. `/help` - аналогично предыдущей команде.
-1. `style_transfer` - запращивает два изображения и переносит стиль с одного на другое при помощи MSG Net.
-1. `style_transfer_slow` - запращивает два изображения и переносит стиль с одного на другое.
+### Bot Commands
+1. `/start` - Displays a brief description of the bot.
+2. `/help` - Similar to the previous command.
+3. `/style_transfer` - Requests two images and transfers the style from one to the other using MSG Net.
+4. `/style_transfer_slow` - Requests two images and transfers the style from one to the other.
 
-## Authors and acknowledgment
-- Автор: Petr Maishev
+### Authors and Acknowledgment
+- Author: Petr Maishev
 - Email: pmaishev@gmail.com
 - StepikId: 82457743
 - Telegram Id: @pmaishev
 
-## Roadmap
-1. TODO: Model to ONNX
-1. TODO: Fit model to my own styles
+### Roadmap
+TODO: Convert model to ONNX
+TODO: Fit model to my own styles
